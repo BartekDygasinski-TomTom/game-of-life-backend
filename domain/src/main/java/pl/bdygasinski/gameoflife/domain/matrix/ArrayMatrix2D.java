@@ -1,5 +1,6 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
+import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
 import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
 
 import java.util.*;
@@ -30,13 +31,13 @@ final class ArrayMatrix2D<T> implements Matrix2D<T> {
 
     @Override
     public T getValueAt(Coordinate2D coordinate) {
-        requireNonNullCoordinate(coordinate);
+        validateCoordinate(coordinate);
         return matrix[coordinate.y()][coordinate.x()];
     }
 
     @Override
     public T setValueAt(T value, Coordinate2D coordinate) {
-        requireNonNullCoordinate(coordinate);
+        validateCoordinate(coordinate);
 
         if (isNull(value)) {
             throw new IllegalArgumentException("Value must not contain null");
@@ -61,9 +62,9 @@ final class ArrayMatrix2D<T> implements Matrix2D<T> {
 
 
 
-    private void requireNonNullCoordinate(Coordinate2D coordinate) {
+    private void validateCoordinate(Coordinate2D coordinate) {
         if (isNull(coordinate)) {
-            throw new IllegalArgumentException("Provided coordinate must not be null");
+            throw new InvalidCoordinateException("Provided coordinate must not be null");
         }
     }
 
