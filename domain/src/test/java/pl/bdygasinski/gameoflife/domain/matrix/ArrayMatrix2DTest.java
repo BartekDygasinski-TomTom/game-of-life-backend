@@ -1,0 +1,453 @@
+package pl.bdygasinski.gameoflife.domain.matrix;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchException;
+
+class ArrayMatrix2DTest {
+
+    private final Coordinate2D[][] matrix = {
+            {new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0)},
+            {new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1)},
+            {new Coordinate2D(0, 2), new Coordinate2D(1, 2), new Coordinate2D(2, 2)},
+    };
+    private final ArrayMatrix2D<Coordinate2D> underTest = new ArrayMatrix2D<>(matrix);
+
+    @DisplayName("creation tests")
+    @Nested
+    class CreationTest {
+
+        @DisplayName("Should throw if input is null")
+        @Test
+        void shouldThrowIfInputIsNull() {
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(null));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining("null");
+        }
+
+        @DisplayName("Should throw if first dimension of array has size = 0")
+        @Test
+        void shouldThrowIfArrayIsEmpty() {
+            // Given
+            var givenArray = new Integer[][]{};
+
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(givenArray));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining(Arrays.toString(givenArray));
+        }
+
+        @DisplayName("Should throw if second dimension of array has size = 0")
+        @Test
+        void shouldThrowIfArrayIsEmpty2() {
+            // Given
+            var givenArray = new Integer[][]{
+                    {}
+            };
+
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(givenArray));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining(Arrays.toString(givenArray));
+        }
+
+        @DisplayName("Should throw if one of rows is null")
+        @Test
+        void shouldThrowIfOneOfRowsIsNull() {
+            // Given
+            var givenData = new Integer[][]{
+                    null
+            };
+
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining(Arrays.toString(givenData));
+        }
+
+        @DisplayName("Should throw if one of rows is not same size")
+        @Test
+        void shouldThrowIfOneOfRowsIsNotSameSIze() {
+            // Given
+            var givenData = new Integer[][]{
+                    {1, 2, 3},
+                    {1, 2}
+            };
+
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining(Arrays.toString(givenData));
+        }
+
+        @DisplayName("Should throw if one of cells is null")
+        @Test
+        void shouldThrowIfOneOfCellIsNull() {
+            // Given
+            var givenData = new Integer[][]{
+                    {1, 2, 3, null}
+            };
+
+            // When
+            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining("null");
+        }
+    }
+
+    @DisplayName("getValueAt()")
+    @Nested
+    class GetValueAtTest {
+
+        @DisplayName("Should throw if input coordinate is null")
+        @Test
+        void shouldThrowIfInputIsNull() {
+            // When
+            Exception result = catchException(() -> underTest.getValueAt(null));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining("null");
+        }
+
+        @DisplayName("Should give item at given position")
+        @ParameterizedTest
+        @MethodSource("coordinateProvider")
+        void shouldGiveItemAtGivenPosition(int x, int y) {
+            // Given
+            var givenCoordinate = new Coordinate2D(x, y);
+
+            // When
+            Coordinate2D result = underTest.getValueAt(givenCoordinate);
+
+            // Then
+            assertThat(result.x())
+                    .isEqualTo(x);
+
+            assertThat(result.y())
+                    .isEqualTo(y);
+        }
+
+
+        static Stream<Arguments> coordinateProvider() {
+            return IntStream.range(0, 3) // rows (y)
+                    .boxed()
+                    .flatMap(y -> IntStream.range(0, 3) // cols (x)
+                            .mapToObj(x -> Arguments.of(x, y)));
+        }
+    }
+
+    @DisplayName("setValueAt()")
+    @Nested
+    class SetValueAtTest {
+
+        @DisplayName("Should throw if input coordinate is null")
+        @Test
+        void shouldThrowIfInputIsNull() {
+            // Given
+            var givenCorrectValue = new Coordinate2D(1, 1);
+
+            // When
+            Exception result = catchException(() -> underTest.setValueAt(givenCorrectValue, null));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining("null");
+        }
+
+        @DisplayName("Should throw if input value is null")
+        @Test
+        void shouldThrowIfInputValueIsNull() {
+            // Given
+            var givenCorrectCoordinate = new Coordinate2D(1, 1);
+
+            // When
+            Exception result = catchException(() -> underTest.setValueAt(null, givenCorrectCoordinate));
+
+            // Then
+            assertThat(result)
+                    .isNotNull()
+                    .hasMessageContaining("null");
+        }
+
+        @DisplayName("Should set item at given position")
+        @ParameterizedTest
+        @MethodSource("coordinateProvider")
+        void shouldGiveItemAtGivenPosition(int x, int y) {
+            // Given
+            var givenCoordinate = new Coordinate2D(x, y);
+            var givenValue = new Coordinate2D(10, 10);
+            var preSetItem = underTest.getValueAt(givenCoordinate);
+
+            // When
+            Coordinate2D result = underTest.setValueAt(givenValue, givenCoordinate);
+
+            // Then
+            assertThat(result)
+                    .isEqualTo(givenValue);
+
+            assertThat(underTest.getValueAt(givenCoordinate))
+                    .isEqualTo(givenValue)
+                    .isNotEqualTo(preSetItem);
+        }
+
+
+        static Stream<Arguments> coordinateProvider() {
+            return IntStream.range(0, 3) // rows (y)
+                    .boxed()
+                    .flatMap(y -> IntStream.range(0, 3) // cols (x)
+                            .mapToObj(x -> Arguments.of(x, y)));
+        }
+    }
+
+    @DisplayName("rowCount()")
+    @Nested
+    class RowCountTest {
+
+        @DisplayName("Should return size of first dimension array")
+        @Test
+        void shouldReturnSizeOfFirstDimensionArray() {
+            // When
+            int result = underTest.rowCount();
+
+            // Then
+            assertThat(result)
+                    .isEqualTo(matrix.length);
+        }
+    }
+
+    @DisplayName("columnCount()")
+    @Nested
+    class ColumnCountTest {
+
+        @DisplayName("Should return size of second dimension array")
+        @Test
+        void shouldReturnSizeOfSecondDimensionArray() {
+            // When
+            int result = underTest.columnCount();
+
+            // Then
+            assertThat(result)
+                    .isEqualTo(matrix[0].length);
+        }
+    }
+
+    @DisplayName("toFlatList()")
+    @Nested
+    class ToFlatListTest {
+
+        @DisplayName("Should return items in row-major order (left to right, top to bottom)")
+        @Test
+        void shouldReturnItemsInRowMajorOrder() {
+            // When
+            List<Coordinate2D> result = underTest.toFlatList();
+
+            // Then
+            assertThat(result).containsExactly(
+                    new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0),
+                    new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1),
+                    new Coordinate2D(0, 2), new Coordinate2D(1, 2), new Coordinate2D(2, 2)
+            );
+        }
+
+    }
+
+    @DisplayName("equals()")
+    @Nested
+    class EqualsTest {
+
+        @Test
+        @DisplayName("Should be equal to itself")
+        void shouldBeEqualToItself() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+
+            // When
+            // Then
+            assertThat(givenMatrix1)
+                    .isEqualTo(givenMatrix1);
+
+        }
+
+        @Test
+        @DisplayName("Should be equal to another object with same values")
+        void shouldBeEqualToAnotherWithSameValues() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenData2 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+
+            // When
+            // Then
+            assertThat(givenMatrix1)
+                    .isEqualTo(givenMatrix2);
+        }
+
+        @Test
+        @DisplayName("Should not be equal to object with different values")
+        void shouldNotBeEqualToDifferentValues() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenData2 = new Integer[][]{
+                    {1, 2, 3, 4}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+
+            // When
+            // Then
+            assertThat(givenMatrix1)
+                    .isNotEqualTo(givenMatrix2);
+        }
+
+        @Test
+        @DisplayName("Should not be equal to null")
+        void shouldNotBeEqualToNull() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+
+            // When
+            // Then
+            assertThat(givenMatrix1)
+                    .isNotEqualTo(null);
+        }
+
+        @Test
+        @DisplayName("Should not be equal to different type")
+        void shouldNotBeEqualToDifferentType() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+
+            // When
+            // Then
+            assertThat(givenMatrix1)
+                    .isNotEqualTo("Not matrix");
+        }
+    }
+
+    @DisplayName("hashCode()")
+    @Nested
+    class HashCodeTest {
+
+        @Test
+        @DisplayName("Should produce same hashCode for equal objects")
+        void shouldProduceSameHashCodeForEqualObjects() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenData2 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+
+            // When
+            // Then
+            assertThat(givenMatrix1.hashCode())
+                    .isEqualTo(givenMatrix2.hashCode());
+        }
+
+        @Test
+        @DisplayName("Should produce different hashCode for unequal objects")
+        void shouldProduceDifferentHashCodeForUnequalObjects() {
+            // Given
+            var givenData1 = new Integer[][]{
+                    {1, 2, 3, 4}
+            };
+            var givenData2 = new Integer[][]{
+                    {1, 2, 3}
+            };
+            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+
+            // When
+            // Then
+            assertThat(givenMatrix1.hashCode())
+                    .isNotEqualTo(givenMatrix2.hashCode());
+        }
+    }
+
+    @DisplayName("toString()")
+    @Nested
+    class ToStringTest {
+
+        @DisplayName("Should return matrix with borders")
+        @Test
+        void shouldReturnMatrixWithBorders() {
+            Integer[][] data = {
+                    {1, 2, 3},
+                    {4, 5, 6},
+                    {7, 8, 9}
+            };
+            var underTest = new ArrayMatrix2D<>(data);
+
+            // When
+            String result = underTest.toString();
+
+            // Then
+            String expected = """
+            -------------
+            | 1 | 2 | 3 |
+            -------------
+            | 4 | 5 | 6 |
+            -------------
+            | 7 | 8 | 9 |
+            -------------
+            """;
+
+            assertThat(result).isEqualTo(expected);
+        }
+    }
+
+
+}
