@@ -449,5 +449,28 @@ class ArrayMatrix2DTest {
         }
     }
 
+    @DisplayName("clone()")
+    @Nested
+    class CloneTest {
+
+        @DisplayName("Should deep copy values")
+        @Test
+        void shouldDeepCopyValues() {
+            // Given
+            var givenMatrix = new Integer[][]{
+                    {1, 2, 3},
+                    {4, 5, 6}
+            };
+            var underTest = new ArrayMatrix2D<>(givenMatrix);
+
+            // When
+            Matrix2D<Integer> result = underTest.clone();
+
+            // Then
+            givenMatrix[1][1] = 0;
+            assertThat(result.getValueAt(new Coordinate2D(1, 1)))
+                    .isEqualTo(5);
+        }
+    }
 
 }

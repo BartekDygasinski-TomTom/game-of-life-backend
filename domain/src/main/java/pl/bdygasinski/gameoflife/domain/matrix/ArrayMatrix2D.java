@@ -7,7 +7,7 @@ import java.util.*;
 
 import static java.util.Objects.isNull;
 
-final class ArrayMatrix2D<T> implements Matrix2D<T> {
+public final class ArrayMatrix2D<T> implements Matrix2D<T> {
 
     private final T[][] matrix;
 
@@ -60,6 +60,11 @@ final class ArrayMatrix2D<T> implements Matrix2D<T> {
                 .toList();
     }
 
+    @Override
+    public Matrix2D<T> clone() {
+        T[][] copiedData = deepCopy(matrix, rowCount(), columnCount());
+        return new ArrayMatrix2D<T>(copiedData);
+    }
 
 
     private void validateCoordinate(Coordinate2D coordinate) {

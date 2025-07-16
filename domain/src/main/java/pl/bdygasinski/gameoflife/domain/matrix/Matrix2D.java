@@ -15,4 +15,6 @@ public interface Matrix2D<T> {
     int columnCount();
 
     List<T> toFlatList();
+
+    Matrix2D<T> clone();
 }
