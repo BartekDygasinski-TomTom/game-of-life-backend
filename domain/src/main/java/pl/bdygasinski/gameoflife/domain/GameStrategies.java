@@ -1,13 +1,14 @@
 package pl.bdygasinski.gameoflife.domain;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 public enum GameStrategies implements GameStrategy {
     CLASSIC_GAME_OF_LIFE_STRATEGY {
 
         @Override
-        public Cell applyCellTransition(Cell cell, Stream<Cell> neighborCells) {
+        public Cell applyCellTransition(Cell cell, List<Cell> neighborCells) {
             long liveNeighbors = neighborCells
+                    .stream()
                     .filter(c -> c == Cell.ALIVE)
                     .count();
 

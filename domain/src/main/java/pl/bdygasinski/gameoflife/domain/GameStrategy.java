@@ -1,8 +1,8 @@
 package pl.bdygasinski.gameoflife.domain;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 public interface GameStrategy {
 
-    Cell applyCellTransition(Cell cell, Stream<Cell> neighborCells);
+    Cell applyCellTransition(Cell cell, List<Cell> neighborCells);
 }

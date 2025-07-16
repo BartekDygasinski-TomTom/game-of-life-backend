@@ -1,4 +1,4 @@
-package pl.bdygasinski.gameoflife.domain.value;
+package pl.bdygasinski.gameoflife.domain.matrix;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

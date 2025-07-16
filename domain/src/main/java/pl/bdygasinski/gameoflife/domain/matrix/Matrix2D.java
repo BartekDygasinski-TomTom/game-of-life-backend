@@ -1,7 +1,5 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
-import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
-
 import java.util.List;
 
 public interface Matrix2D<T> {
@@ -19,4 +17,6 @@ public interface Matrix2D<T> {
     List<Coordinate2D> getAvailableCoordinates();
 
     Matrix2D<T> clone();
+
+    boolean containsCoordinate(Coordinate2D coordinate2D);
 }

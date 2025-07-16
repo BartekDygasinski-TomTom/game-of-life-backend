@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
 
 import java.util.Arrays;
 import java.util.List;
@@ -494,6 +493,57 @@ class ArrayMatrix2DTest {
             givenMatrix[1][1] = 0;
             assertThat(result.getValueAt(new Coordinate2D(1, 1)))
                     .isEqualTo(5);
+        }
+    }
+
+    @DisplayName("containsCoordinate()")
+    @Nested
+    class ContainsCoordinateTest {
+
+        private final int givenRowCount = matrix.length;
+        private final int givenColCount = matrix[0].length;
+
+        @DisplayName("Should return true if x < columns and y < rows")
+        @Test
+        void shouldReturnTrue() {
+            // Given
+            var givenCoordinate = new Coordinate2D(givenColCount - 1, givenRowCount -1);
+
+
+            // When
+            var result = underTest.containsCoordinate(givenCoordinate);
+
+            // Then
+            assertThat(result)
+                    .isTrue();
+        }
+
+        @DisplayName("Should return false if x >= columns")
+        @Test
+        void shouldReturnFalse() {
+            // Given
+            var givenCoordinate = new Coordinate2D(givenColCount, givenRowCount - 1);
+
+            // When
+            var result = underTest.containsCoordinate(givenCoordinate);
+
+            // Then
+            assertThat(result)
+                    .isFalse();
+        }
+
+        @DisplayName("Should return false if y >= rows")
+        @Test
+        void shouldReturnFalse2() {
+            // Given
+            var givenCoordinate = new Coordinate2D(givenColCount - 1, givenRowCount);
+
+            // When
+            var result = underTest.containsCoordinate(givenCoordinate);
+
+            // Then
+            assertThat(result)
+                    .isFalse();
         }
     }
 

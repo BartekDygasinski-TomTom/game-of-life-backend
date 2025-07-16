@@ -4,10 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class GameStrategiesTest {
 
@@ -22,7 +21,7 @@ class GameStrategiesTest {
         void shouldTransformDeadCellToLiveCell() {
             // Given
             var givenCell = Cell.DEAD;
-            var givenNeighborCells = Stream.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
+            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -37,7 +36,7 @@ class GameStrategiesTest {
         void shouldTransformDeadCellToLiveCell2() {
             // Given
             var givenCell = Cell.DEAD;
-            var givenNeighborCells = Stream.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
+            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -52,7 +51,7 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.ALIVE);
+            var givenNeighborCells = List.of(Cell.ALIVE);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -67,7 +66,7 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell2() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.DEAD, Cell.ALIVE, Cell.DEAD);
+            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.DEAD);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -82,7 +81,7 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell3() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
+            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -97,7 +96,7 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell4() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
+            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -112,7 +111,7 @@ class GameStrategiesTest {
         void shouldLive() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.ALIVE, Cell.ALIVE);
+            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -127,7 +126,7 @@ class GameStrategiesTest {
         void shouldLive2() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
+            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -142,7 +141,7 @@ class GameStrategiesTest {
         void shouldLive3() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
+            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
@@ -157,7 +156,7 @@ class GameStrategiesTest {
         void shouldLive4() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = Stream.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
+            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
 
             // When
             var result = underTest.applyCellTransition(givenCell, givenNeighborCells);

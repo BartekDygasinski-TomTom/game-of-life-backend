@@ -1,7 +1,6 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
 import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
-import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,6 +78,11 @@ public final class ArrayMatrix2D<T> implements Matrix2D<T> {
     public Matrix2D<T> clone() {
         T[][] copiedData = deepCopy(matrix, rowCount(), columnCount());
         return new ArrayMatrix2D<T>(copiedData);
+    }
+
+    @Override
+    public boolean containsCoordinate(Coordinate2D coordinate2D) {
+        return coordinate2D.x() < columnCount() && coordinate2D.y() < rowCount();
     }
 
 

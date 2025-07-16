@@ -1,4 +1,4 @@
-package pl.bdygasinski.gameoflife.domain.value;
+package pl.bdygasinski.gameoflife.domain.matrix;
 
 import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
 
