@@ -16,5 +16,7 @@ public interface Matrix2D<T> {
 
     List<T> toFlatList();
 
+    List<Coordinate2D> getAvailableCoordinates();
+
     Matrix2D<T> clone();
 }

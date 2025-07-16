@@ -3,7 +3,11 @@ package pl.bdygasinski.gameoflife.domain.matrix;
 import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
 import pl.bdygasinski.gameoflife.domain.value.Coordinate2D;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 
@@ -57,6 +61,17 @@ public final class ArrayMatrix2D<T> implements Matrix2D<T> {
     public List<T> toFlatList() {
         return Arrays.stream(matrix)
                 .flatMap(Arrays::stream)
+                .toList();
+    }
+
+    @Override
+    public List<Coordinate2D> getAvailableCoordinates() {
+        return IntStream
+                .range(0, rowCount())
+                .boxed()
+                .flatMap(row -> IntStream
+                        .range(0, columnCount())
+                        .mapToObj(col -> new Coordinate2D(col, row)))
                 .toList();
     }
 

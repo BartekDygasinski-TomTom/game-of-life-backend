@@ -285,6 +285,30 @@ class ArrayMatrix2DTest {
 
     }
 
+    @DisplayName("getAvailableCoordinates()")
+    @Nested
+    class GetAvailableCoordinatesTest {
+
+        @DisplayName("Should give list of coordinates of all items in matrix")
+        @Test
+        void shouldGiveListOfCoordinatesOfAllItemsInMatrix() {
+            // Given
+            var givenData = new Integer[][]{
+                    {1, 2, 3},
+                    {4, 5, 6}
+            };
+            var underTest = new ArrayMatrix2D<>(givenData);
+
+            // When
+            var result = underTest.getAvailableCoordinates();
+
+            // Then
+            assertThat(result)
+                    .hasSize(6);
+        }
+
+    }
+
     @DisplayName("equals()")
     @Nested
     class EqualsTest {
