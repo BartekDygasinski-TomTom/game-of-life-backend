@@ -304,6 +304,16 @@ class ArrayMatrix2DTest {
             // Then
             assertThat(result)
                     .hasSize(6);
+
+            assertThat(result.stream().mapToInt(Coordinate2D::x).min())
+                    .hasValue(0);
+            assertThat(result.stream().mapToInt(Coordinate2D::x).max())
+                    .hasValue(2);
+
+            assertThat(result.stream().mapToInt(Coordinate2D::y).min())
+                    .hasValue(0);
+            assertThat(result.stream().mapToInt(Coordinate2D::y).max())
+                    .hasValue(1);
         }
 
     }
