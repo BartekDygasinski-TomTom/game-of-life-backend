@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
@@ -12,8 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 
 class Coordinate2DTest {
-
-    private static final short ALL_POSSIBLE_NEIGHBOR_COUNT = 8;
 
     private final Coordinate2D underTest = new Coordinate2D(1, 1);
 
@@ -67,6 +66,34 @@ class Coordinate2DTest {
             // Then
             assertThat(result)
                     .isNull();
+        }
+    }
+
+    @DisplayName("offset()")
+    @Nested
+    class OffsetTest {
+
+        @DisplayName("Should give correct coordinate")
+        @ParameterizedTest
+        @CsvSource({
+                "1,1",
+                "-1,-1",
+                "0,1",
+                "0,-1",
+                "1, 0",
+                "-1,0",
+                "0, 0"
+        })
+        void shouldGiveCorrectCoordinate(int deltaX, int deltaY) {
+            // When
+            Coordinate2D result = underTest.offset(deltaX, deltaY);
+
+            // Then
+            assertThat(result)
+                    .isEqualTo(new Coordinate2D(
+                            underTest.x() + deltaX,
+                            underTest.y() + deltaY
+                    ));
         }
     }
 
@@ -225,7 +252,16 @@ class Coordinate2DTest {
 
             // Then
             assertThat(result)
-                    .hasSize(ALL_POSSIBLE_NEIGHBOR_COUNT);
+                    .containsExactly(
+                            new Coordinate2D(1, 0),
+                            new Coordinate2D(1, 2),
+                            new Coordinate2D(0, 1),
+                            new Coordinate2D(2, 1),
+                            new Coordinate2D(0, 0),
+                            new Coordinate2D(2, 0),
+                            new Coordinate2D(0, 2),
+                            new Coordinate2D(2, 2)
+                    );
         }
 
         @DisplayName("Should not return not valid neighbor coordinates")
@@ -239,7 +275,10 @@ class Coordinate2DTest {
 
             // Then
             assertThat(result)
-                    .hasSize(3);
+                    .containsExactly(
+                            new Coordinate2D(0, 1),
+                            new Coordinate2D(1, 0),
+                            new Coordinate2D(1, 1));
         }
 
     }

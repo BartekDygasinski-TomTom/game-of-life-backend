@@ -1,6 +1,6 @@
 package pl.bdygasinski.gameoflife.domain;
 
-import pl.bdygasinski.gameoflife.domain.matrix.ArrayMatrix2D;
+import pl.bdygasinski.gameoflife.domain.matrix.FixedSizeArrayMatrix2D;
 import pl.bdygasinski.gameoflife.domain.matrix.Coordinate2D;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
 
@@ -17,6 +17,10 @@ public class BoardFactory {
             throw new IllegalArgumentException("Alive percentage must be between 0 and 1 but was %s".formatted(alivePercentage));
         }
 
+        if (rows <= 0 || cols <= 0) {
+            throw new IllegalArgumentException("Rows and cols must be > 0 but got rows=%s, cols=%s".formatted(rows, cols));
+        }
+
         int totalCells = rows * cols;
         int aliveCount = (int) Math.round(alivePercentage * totalCells);
 
@@ -24,29 +28,26 @@ public class BoardFactory {
         Set<Coordinate2D> coordinatesMarkedForRevival = pickRandomCoordinatesSubset(allCoordinates, aliveCount);
         Cell[][] cells = buildMatrix(rows, cols, coordinatesMarkedForRevival);
 
-        return new FixedSizeBoard(new ArrayMatrix2D<>(cells), strategy);
+        return new DefaultBoard(new FixedSizeArrayMatrix2D<>(cells), strategy);
     }
 
     public Board fromBaseState(Matrix2D<Cell> baseState, GameStrategy gameStrategy) {
-        return new FixedSizeBoard(baseState, gameStrategy);
+        return new DefaultBoard(baseState, gameStrategy);
     }
 
-    List<Coordinate2D> generateAllCoordinates(int rows, int cols) {
+    private List<Coordinate2D> generateAllCoordinates(int rows, int cols) {
         return IntStream
                 .range(0, rows * cols)
                 .mapToObj(i -> new Coordinate2D(i % cols, i / cols))
                 .collect(Collectors.toList());
     }
 
-    Set<Coordinate2D> pickRandomCoordinatesSubset(List<Coordinate2D> allCoords, int count) {
-        if (count < 0) count = 0;
-        if (count > allCoords.size()) count = allCoords.size();
-
+    private Set<Coordinate2D> pickRandomCoordinatesSubset(List<Coordinate2D> allCoords, int aliveCount) {
         Collections.shuffle(allCoords);
-        return Set.copyOf(allCoords.subList(0, count));
+        return Set.copyOf(allCoords.subList(0, aliveCount));
     }
 
-    Cell[][] buildMatrix(int rows, int cols, Set<Coordinate2D> aliveCoords) {
+    private Cell[][] buildMatrix(int rows, int cols, Set<Coordinate2D> aliveCoords) {
         Cell[][] matrix = new Cell[rows][cols];
 
         IntStream.range(0, rows * cols).forEach(i -> {

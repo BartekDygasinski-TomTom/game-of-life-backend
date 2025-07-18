@@ -6,15 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import pl.bdygasinski.gameoflife.domain.matrix.ArrayMatrix2D;
-import pl.bdygasinski.gameoflife.domain.matrix.Coordinate2D;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.stream.Collectors.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.Mockito.mock;
@@ -53,102 +46,6 @@ class BoardFactoryTest {
         }
     }
 
-    @DisplayName("generateAllCoordinates()")
-    @Nested
-    class GenerateAllCoordinatesTest {
-
-        @DisplayName("Should give list of coordinates of all items in given rows and cols")
-        @Test
-        void shouldGiveListOfCoordinatesOfAllItemsInGivenRowsAndCols() {
-            // Given
-            var givenRows = 3;
-            var givenCols = 5;
-
-            // When
-            var result = underTest.generateAllCoordinates(givenRows, givenCols);
-
-            // Then
-            assertThat(result)
-                    .hasSize(givenCols * givenRows);
-
-            assertThat(result.stream().mapToInt(Coordinate2D::x).min())
-                    .hasValue(0);
-            assertThat(result.stream().mapToInt(Coordinate2D::x).max())
-                    .hasValue(givenCols - 1);
-
-            assertThat(result.stream().mapToInt(Coordinate2D::y).min())
-                    .hasValue(0);
-            assertThat(result.stream().mapToInt(Coordinate2D::y).max())
-                    .hasValue(givenRows - 1);
-        }
-    }
-
-    @DisplayName("pickRandomCoordinatesSubset()")
-    @Nested
-    class PickRandomCoordinatesSubsetTest {
-
-        @DisplayName("Should pick input count of elements")
-        @ParameterizedTest
-        @ValueSource(ints = {Integer.MIN_VALUE, 0, Integer.MAX_VALUE})
-        void shouldPickInputCountOfElements(int count) {
-            // Given
-            var givenList = new ArrayList<>(List.of(
-                    new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0),
-                    new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1)
-            ));
-            int expectedSize = Math.max(0, Math.min(count, givenList.size()));
-
-            // When
-            var result = underTest.pickRandomCoordinatesSubset(givenList, count);
-
-            // Then
-            assertThat(result)
-                    .hasSize(expectedSize);
-        }
-    }
-
-    @DisplayName("buildMatrix()")
-    @Nested
-    class BuildMatrixTest {
-
-        @DisplayName("Should build matrix given rows * given columns with LIVE cells in provided coordinates")
-        @Test
-        void shouldBuildMatrixWithGivenSizeWithLiveCellsAtProvidedCoordinates() {
-            // Given
-            Set<Coordinate2D> givenPositionOfLiveCells = Set.of(
-                    new Coordinate2D(0, 0), new Coordinate2D(3, 2),
-                    new Coordinate2D(1, 2), new Coordinate2D(3, 3)
-            );
-            var givenColSize = 5;
-            var givenRowSize = 4;
-
-            // When
-            Cell[][] result = underTest.buildMatrix(givenRowSize, givenColSize, givenPositionOfLiveCells);
-
-            // Then
-            assertThat(result)
-                    .isNotNull()
-                    .hasDimensions(givenRowSize, givenColSize);
-
-            ArrayMatrix2D<Cell> wrapperMatrix = new ArrayMatrix2D<>(result);
-           var partitioned = wrapperMatrix
-                    .getAvailableCoordinates()
-                    .stream()
-                    .collect(partitioningBy(
-                            givenPositionOfLiveCells::contains,
-                            mapping(wrapperMatrix::getValueAt, toList())
-                    ));
-
-            assertThat(partitioned.get(true))   // cells that SHOULD be alive
-                    .as("Cells at expected ALIVE coordinates")
-                    .allMatch(cell -> cell == Cell.ALIVE);
-
-            assertThat(partitioned.get(false))  // cells that SHOULD be dead
-                    .as("Cells at remaining coordinates")
-                    .allMatch(cell -> cell == Cell.DEAD);
-        }
-
-    }
     @DisplayName("randomBoardWithAlivePercentage()")
     @Nested
     class RandomBoardWithAlivePercentageTest {
@@ -194,6 +91,26 @@ class BoardFactoryTest {
             assertThat(actualAliveCount)
                     .isEqualTo(expectedCount);
 
+        }
+
+
+        @DisplayName("Should have throw if rows or cols are <= 0")
+        @ParameterizedTest
+        @CsvSource({
+                "-1, 1",
+                "0, 1",
+                "1, -1",
+                "1, 0"
+        })
+        void shouldThrowIfRowsOrColsAreNotValid(int rows, int cols) {
+            // When
+            Exception result = catchException(() -> underTest.randomBoardWithAlivePercentage(rows, cols, 0.3, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
+
+            // Then
+            assertThat(result)
+                    .isNotNull();
+            assertThat(result.getMessage())
+                    .containsAnyOf(String.valueOf(rows), String.valueOf(cols));
         }
 
     }

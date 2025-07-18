@@ -9,7 +9,7 @@ public enum GameStrategies implements GameStrategy {
         public Cell applyCellTransition(Cell cell, List<Cell> neighborCells) {
             long liveNeighbors = neighborCells
                     .stream()
-                    .filter(c -> c == Cell.ALIVE)
+                    .filter(Cell.ALIVE::equals)
                     .count();
 
             return switch (cell) {

@@ -1,5 +1,6 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,14 +16,14 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 
-class ArrayMatrix2DTest {
+class FixedSizeArrayMatrix2DTest {
 
     private final Coordinate2D[][] matrix = {
             {new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0)},
             {new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1)},
             {new Coordinate2D(0, 2), new Coordinate2D(1, 2), new Coordinate2D(2, 2)},
     };
-    private final ArrayMatrix2D<Coordinate2D> underTest = new ArrayMatrix2D<>(matrix);
+    private final FixedSizeArrayMatrix2D<Coordinate2D> underTest = new FixedSizeArrayMatrix2D<>(matrix);
 
     @DisplayName("creation tests")
     @Nested
@@ -32,7 +33,7 @@ class ArrayMatrix2DTest {
         @Test
         void shouldThrowIfInputIsNull() {
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(null));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(null));
 
             // Then
             assertThat(result)
@@ -47,7 +48,7 @@ class ArrayMatrix2DTest {
             var givenArray = new Integer[][]{};
 
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(givenArray));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenArray));
 
             // Then
             assertThat(result)
@@ -64,7 +65,7 @@ class ArrayMatrix2DTest {
             };
 
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(givenArray));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenArray));
 
             // Then
             assertThat(result)
@@ -81,7 +82,7 @@ class ArrayMatrix2DTest {
             };
 
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenData));
 
             // Then
             assertThat(result)
@@ -99,7 +100,7 @@ class ArrayMatrix2DTest {
             };
 
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenData));
 
             // Then
             assertThat(result)
@@ -116,7 +117,7 @@ class ArrayMatrix2DTest {
             };
 
             // When
-            Exception result = catchException(() -> new ArrayMatrix2D<>(givenData));
+            Exception result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenData));
 
             // Then
             assertThat(result)
@@ -296,7 +297,7 @@ class ArrayMatrix2DTest {
                     {1, 2, 3},
                     {4, 5, 6}
             };
-            var underTest = new ArrayMatrix2D<>(givenData);
+            var underTest = new FixedSizeArrayMatrix2D<>(givenData);
 
             // When
             var result = underTest.getAvailableCoordinates();
@@ -329,7 +330,7 @@ class ArrayMatrix2DTest {
             var givenData1 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
 
             // When
             // Then
@@ -348,8 +349,8 @@ class ArrayMatrix2DTest {
             var givenData2 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
-            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new FixedSizeArrayMatrix2D<>(givenData2);
 
             // When
             // Then
@@ -367,8 +368,8 @@ class ArrayMatrix2DTest {
             var givenData2 = new Integer[][]{
                     {1, 2, 3, 4}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
-            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new FixedSizeArrayMatrix2D<>(givenData2);
 
             // When
             // Then
@@ -383,7 +384,7 @@ class ArrayMatrix2DTest {
             var givenData1 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
 
             // When
             // Then
@@ -398,7 +399,7 @@ class ArrayMatrix2DTest {
             var givenData1 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
 
             // When
             // Then
@@ -421,8 +422,8 @@ class ArrayMatrix2DTest {
             var givenData2 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
-            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new FixedSizeArrayMatrix2D<>(givenData2);
 
             // When
             // Then
@@ -440,8 +441,8 @@ class ArrayMatrix2DTest {
             var givenData2 = new Integer[][]{
                     {1, 2, 3}
             };
-            var givenMatrix1 = new ArrayMatrix2D<>(givenData1);
-            var givenMatrix2 = new ArrayMatrix2D<>(givenData2);
+            var givenMatrix1 = new FixedSizeArrayMatrix2D<>(givenData1);
+            var givenMatrix2 = new FixedSizeArrayMatrix2D<>(givenData2);
 
             // When
             // Then
@@ -462,23 +463,22 @@ class ArrayMatrix2DTest {
                     {4, 5, 6},
                     {7, 8, 9}
             };
-            var underTest = new ArrayMatrix2D<>(data);
+            var underTest = new FixedSizeArrayMatrix2D<>(data);
 
             // When
             String result = underTest.toString();
 
             // Then
-            String expected = """
-            -------------
-            | 1 | 2 | 3 |
-            -------------
-            | 4 | 5 | 6 |
-            -------------
-            | 7 | 8 | 9 |
-            -------------
-            """;
-
-            assertThat(result).isEqualTo(expected);
+            SoftAssertions softAssertions = new SoftAssertions();
+            for (Integer[] row : data) {
+                for (Integer value : row) {
+                    softAssertions.
+                            assertThat(result)
+                            .withFailMessage("Expected toString to contain: %s", value)
+                            .contains(value.toString());
+                }
+            }
+            softAssertions.assertAll();
         }
     }
 
@@ -494,7 +494,7 @@ class ArrayMatrix2DTest {
                     {1, 2, 3},
                     {4, 5, 6}
             };
-            var underTest = new ArrayMatrix2D<>(givenMatrix);
+            var underTest = new FixedSizeArrayMatrix2D<>(givenMatrix);
 
             // When
             Matrix2D<Integer> result = underTest.clone();

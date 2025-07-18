@@ -19,36 +19,40 @@ public record Coordinate2D(int x, int y) {
         }
     }
 
+    public Coordinate2D offset(int deltaX, int deltaY) {
+        return new Coordinate2D(x + deltaX, y + deltaY);
+    }
+
     public Coordinate2D up()    {
-        return new Coordinate2D(x, y - 1);
+        return offset(0, -1);
     }
 
     public Coordinate2D down()  {
-        return new Coordinate2D(x, y + 1);
+        return offset(0, 1);
     }
 
     public Coordinate2D left()  {
-        return new Coordinate2D(x - 1, y);
+        return offset(-1, 0);
     }
 
     public Coordinate2D right() {
-        return new Coordinate2D(x + 1, y);
+        return offset(1, 0);
     }
 
     public Coordinate2D upLeft()    {
-        return new Coordinate2D(x - 1, y - 1);
+        return offset(-1, -1);
     }
 
     public Coordinate2D upRight()   {
-        return new Coordinate2D(x + 1, y - 1);
+        return offset(1, -1);
     }
 
     public Coordinate2D downLeft()  {
-        return new Coordinate2D(x - 1, y + 1);
+        return offset(-1, 1);
     }
 
     public Coordinate2D downRight() {
-        return new Coordinate2D(x + 1, y + 1);
+        return offset(1, 1);
     }
 
     public List<Coordinate2D> allNeighborCoordinates() {
@@ -68,7 +72,7 @@ public record Coordinate2D(int x, int y) {
                 .toList();
     }
 
-    private static <T> Function<Supplier<T>, Optional<T>> safeGet() {
+    private static Function<Supplier<Coordinate2D>, Optional<Coordinate2D>> safeGet() {
         return supplier -> {
             try {
                 return Optional.ofNullable(supplier.get());

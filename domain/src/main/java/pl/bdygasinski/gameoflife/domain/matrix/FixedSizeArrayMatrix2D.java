@@ -10,11 +10,11 @@ import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 
-public final class ArrayMatrix2D<T> implements Matrix2D<T> {
+public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
 
     private final T[][] matrix;
 
-    public ArrayMatrix2D(T[][] input) {
+    public FixedSizeArrayMatrix2D(T[][] input) {
         if (isNull(input)) throw new IllegalArgumentException("Matrix cannot be null");
         String inputAsString = Arrays.toString(input);
 
@@ -77,7 +77,7 @@ public final class ArrayMatrix2D<T> implements Matrix2D<T> {
     @Override
     public Matrix2D<T> clone() {
         T[][] copiedData = deepCopy(matrix, rowCount(), columnCount());
-        return new ArrayMatrix2D<T>(copiedData);
+        return new FixedSizeArrayMatrix2D<T>(copiedData);
     }
 
     @Override
@@ -118,7 +118,7 @@ public final class ArrayMatrix2D<T> implements Matrix2D<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ArrayMatrix2D<?> matrix2D)) return false;
+        if (!(o instanceof FixedSizeArrayMatrix2D<?> matrix2D)) return false;
         return Objects.deepEquals(matrix, matrix2D.matrix);
     }
 
