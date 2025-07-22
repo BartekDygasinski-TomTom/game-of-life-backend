@@ -1,64 +1,52 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
-import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import pl.bdygasinski.gameoflife.domain.exception.InvalidBoardSizeException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
 
-import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
+@EqualsAndHashCode
 public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
 
+    private final MatrixDimensions matrixDimensions;
+    private final MatrixDataProvider<T[][]> matrixDataProvider;
     private final T[][] matrix;
 
-    public FixedSizeArrayMatrix2D(T[][] input) {
-        if (isNull(input)) throw new IllegalArgumentException("Matrix cannot be null");
-        String inputAsString = Arrays.toString(input);
+    public FixedSizeArrayMatrix2D(@NonNull MatrixDimensions matrixDimensions, @NonNull MatrixDataProvider<T[][]> matrixDataProvider) {
+        this.matrixDataProvider = matrixDataProvider;
+        this.matrixDimensions = matrixDimensions;
+        this.matrix = matrixDataProvider.clone();
 
-        var rowCount = input.length;
-        if (rowCount == 0)
-            throw new IllegalArgumentException("Matrix must have at least one row but got %s".formatted(inputAsString));
-
-        var columnCount = input[0] != null ? input[0].length : -1;
-        if (columnCount == 0) {
-            throw new IllegalArgumentException("Matrix must have at least one column but got %s".formatted(inputAsString));
-        }
-
-        validateIfMatrixContainNulls(input, columnCount);
-
-        this.matrix = deepCopy(input, rowCount, columnCount);
+        validateMatrixAfterCreation();
     }
 
     @Override
-    public T getValueAt(Coordinate2D coordinate) {
-        validateCoordinate(coordinate);
+    public T getValueAt(@NonNull Coordinate2D coordinate) {
         return matrix[coordinate.y()][coordinate.x()];
     }
 
     @Override
-    public T setValueAt(T value, Coordinate2D coordinate) {
-        validateCoordinate(coordinate);
-
-        if (isNull(value)) {
-            throw new IllegalArgumentException("Value must not contain null");
-        }
-
+    public T setValueAt(@NonNull T value, @NonNull Coordinate2D coordinate) {
         matrix[coordinate.y()][coordinate.x()] = value;
         return value;
     }
 
     @Override
-    public int rowCount() { return matrix.length; }
+    public int rowCount() { return matrixDimensions.rows(); }
 
     @Override
-    public int columnCount() { return matrix[0].length; }
+    public int columnCount() { return matrixDimensions.columns(); }
 
     @Override
     public List<T> toFlatList() {
-        return Arrays.stream(matrix)
+        return Arrays
+                .stream(matrix)
                 .flatMap(Arrays::stream)
                 .toList();
     }
@@ -75,56 +63,27 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
     }
 
     @Override
-    public Matrix2D<T> clone() {
-        T[][] copiedData = deepCopy(matrix, rowCount(), columnCount());
-        return new FixedSizeArrayMatrix2D<T>(copiedData);
+    public Matrix2D<T> copy() {
+        T[][] clonedMatrix = matrixDataProvider.clone();
+        return new FixedSizeArrayMatrix2D<>(
+                matrixDimensions,
+                new MatrixDataProvider<>() {
+                    @Override
+                    public T[][] provide() {
+                        return clonedMatrix;
+                    }
+
+                    @Override
+                    public T[][] clone() {
+                        return matrixDataProvider.clone();
+                    }
+                }
+        );
     }
 
     @Override
-    public boolean containsCoordinate(Coordinate2D coordinate2D) {
+    public boolean containsCoordinate(@NonNull Coordinate2D coordinate2D) {
         return coordinate2D.x() < columnCount() && coordinate2D.y() < rowCount();
-    }
-
-
-    private void validateCoordinate(Coordinate2D coordinate) {
-        if (isNull(coordinate)) {
-            throw new InvalidCoordinateException("Provided coordinate must not be null");
-        }
-    }
-
-    private void validateIfMatrixContainNulls(T[][] input, int expectedCols) {
-        String inputAsString = Arrays.toString(input);
-
-        for (T[] row : input) {
-            if (isNull(row))
-                throw new IllegalArgumentException("Matrix row cannot be null but got %s".formatted(inputAsString));
-            if (row.length != expectedCols)
-                throw new IllegalArgumentException("All rows must have the same length but got %s".formatted(inputAsString));
-            for (T cell : row) {
-                if (cell == null)
-                    throw new IllegalArgumentException("Matrix cell cannot be null");
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private T[][] deepCopy(T[][] original, int rows, int cols) {
-        T[][] copy = (T[][]) new Object[rows][cols]; // unavoidable
-        for (int i = 0; i < rows; i++) {
-            copy[i] = Arrays.copyOf(original[i], cols);
-        }
-        return copy;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof FixedSizeArrayMatrix2D<?> matrix2D)) return false;
-        return Objects.deepEquals(matrix, matrix2D.matrix);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(matrix);
     }
 
     @Override
@@ -143,11 +102,30 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
         return matrixString.toString();
     }
 
+
+
     private String prepareRow(T[] row, String lineSeparator) {
         StringJoiner joiner = new StringJoiner(" | ", "| ", " |");
         for (T cell : row) {
             joiner.add(String.valueOf(cell));
         }
         return joiner.toString() + lineSeparator;
+    }
+
+    private void validateMatrixAfterCreation() {
+        requireNonNull(matrix, "Matrix can't be null");
+
+        if (matrix.length != matrixDimensions.rows()) {
+            throw new InvalidBoardSizeException("All rows must have the same length but got %s".formatted(matrixDimensions));
+        }
+
+        for (T[] row : matrix) {
+            requireNonNull(row, "Row can't be null");
+            if (row.length != matrixDimensions.columns())
+                throw new InvalidBoardSizeException("All rows must have the same length but got %s".formatted(matrixDimensions));
+            for (T cell : row) {
+                requireNonNull(cell, "Cell can't be null");
+            }
+        }
     }
 }

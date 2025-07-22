@@ -6,15 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import pl.bdygasinski.gameoflife.domain.cell.Cell;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
+import pl.bdygasinski.gameoflife.domain.matrix.MatrixDimensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.Mockito.mock;
 
-class BoardFactoryTest {
+class GameStateFactoryTest {
 
-    private final BoardFactory underTest = new BoardFactory();
+    private final GameStateFactory underTest = new GameStateFactory();
 
     @DisplayName("fromBaseState()")
     @Nested
@@ -24,7 +26,7 @@ class BoardFactoryTest {
         @Test
         void shouldThrowIfInputCellMatrixIsNull() {
             // When
-            Exception result = catchException(() -> underTest.fromBaseState(null, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
+            var result = catchException(() -> underTest.fromBaseState(null, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
 
             // Then
             assertThat(result)
@@ -37,7 +39,7 @@ class BoardFactoryTest {
         void shouldThrowIfInputStrategyIsNull() {
             // When
             var givenMatrix = mock(Matrix2D.class);
-            Exception result = catchException(() -> underTest.fromBaseState(givenMatrix, null));
+            var result = catchException(() -> underTest.fromBaseState(givenMatrix, null));
 
             // Then
             assertThat(result)
@@ -48,7 +50,7 @@ class BoardFactoryTest {
 
     @DisplayName("randomBoardWithAlivePercentage()")
     @Nested
-    class RandomBoardWithAlivePercentageTest {
+    class RandomGameStateWithAlivePercentageTest {
 
         @DisplayName("Should throw if alive percentage is not valid")
         @ParameterizedTest
@@ -56,7 +58,8 @@ class BoardFactoryTest {
         void shouldThrowIfAlivePercentageIsNotValid(double alivePercentage) {
             // When
             var givenStrategy = GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY;
-            Exception result = catchException(() -> underTest.randomBoardWithAlivePercentage(4, 4, alivePercentage, givenStrategy));
+            var givenDimensions = new MatrixDimensions(4, 4);
+            var result = catchException(() -> underTest.randomGameStateWithAlivePercentage(givenDimensions, alivePercentage, givenStrategy));
 
             // Then
             assertThat(result)
@@ -64,25 +67,28 @@ class BoardFactoryTest {
                     .hasMessageContaining(String.valueOf(alivePercentage));
         }
 
-        @DisplayName("Should have given alive percentage of live cells in matrix")
+        @DisplayName("Should give alive percentage of live cells in matrix")
         @ParameterizedTest
         @CsvSource({
                 "0.0, 4, 4, 0",
                 "0.5, 4, 4, 8",
                 "1, 4, 4, 16"
         })
-        void shouldHaveGivenAlivePercentageOfLiveCellsInMatrix(double alivePercentage, int rows, int cols, double expectedCount) {
+        void shouldHaveGivenAlivePercentageOfLiveCellsInMatrix(double alivePercentage, int rows, int cols, long expectedCount) {
+            // Given
+            var givenDimensions = new MatrixDimensions(rows, cols);
+
             // When
-            Board result = underTest.randomBoardWithAlivePercentage(rows, cols, alivePercentage, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY);
+            var result = underTest.randomGameStateWithAlivePercentage(givenDimensions, alivePercentage, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY);
 
             // Then
-            Matrix2D<Cell> resultMatrix = result.cellMatrix2D();
+            var resultMatrix = result.board();
             assertThat(resultMatrix.rowCount())
                     .isEqualTo(rows);
             assertThat(resultMatrix.columnCount())
                     .isEqualTo(cols);
 
-            double actualAliveCount = resultMatrix
+            var actualAliveCount = resultMatrix
                     .toFlatList()
                     .stream()
                     .filter(cell -> cell == Cell.ALIVE)
@@ -94,23 +100,16 @@ class BoardFactoryTest {
         }
 
 
-        @DisplayName("Should have throw if rows or cols are <= 0")
-        @ParameterizedTest
-        @CsvSource({
-                "-1, 1",
-                "0, 1",
-                "1, -1",
-                "1, 0"
-        })
-        void shouldThrowIfRowsOrColsAreNotValid(int rows, int cols) {
+        @DisplayName("Should have throw if dimension is null")
+        @Test
+        void shouldThrowIfDimensionIsNull() {
             // When
-            Exception result = catchException(() -> underTest.randomBoardWithAlivePercentage(rows, cols, 0.3, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
+            Exception result = catchException(() -> underTest.randomGameStateWithAlivePercentage(null, 0.3, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
 
             // Then
             assertThat(result)
-                    .isNotNull();
-            assertThat(result.getMessage())
-                    .containsAnyOf(String.valueOf(rows), String.valueOf(cols));
+                    .isNotNull()
+                    .hasMessageContaining("null");
         }
 
     }

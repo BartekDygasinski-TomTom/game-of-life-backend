@@ -1,8 +1,9 @@
 package pl.bdygasinski.gameoflife.domain;
 
-import java.util.List;
+import pl.bdygasinski.gameoflife.domain.cell.Cell;
+import pl.bdygasinski.gameoflife.domain.cell.CellStats;
 
 public interface GameStrategy {
 
-    Cell applyCellTransition(Cell cell, List<Cell> neighborCells);
+    Cell applyCellTransition(Cell cell, CellStats cellStats);
 }

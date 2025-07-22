@@ -16,7 +16,7 @@ public interface Matrix2D<T> {
 
     List<Coordinate2D> getAvailableCoordinates();
 
-    Matrix2D<T> clone();
+    Matrix2D<T> copy();
 
     boolean containsCoordinate(Coordinate2D coordinate2D);
 }

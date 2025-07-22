@@ -3,8 +3,10 @@ package pl.bdygasinski.gameoflife.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import pl.bdygasinski.gameoflife.domain.cell.Cell;
+import pl.bdygasinski.gameoflife.domain.cell.CellStats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,25 +23,10 @@ class GameStrategiesTest {
         void shouldTransformDeadCellToLiveCell() {
             // Given
             var givenCell = Cell.DEAD;
-            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
+            var givenCellStats = new CellStats(3);
 
             // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
-        }
-
-        @DisplayName("When neighbor live cells = 3 and other are dead, should transform dead cell to live cell")
-        @Test
-        void shouldTransformDeadCellToLiveCell2() {
-            // Given
-            var givenCell = Cell.DEAD;
-            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
+            var result = underTest.applyCellTransition(givenCell, givenCellStats);
 
             // Then
             assertThat(result)
@@ -51,25 +38,10 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.ALIVE);
+            var givenCellStats = new CellStats(1);
 
             // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.DEAD);
-        }
-
-        @DisplayName("When neighbor live cells < 2 and other are dead, should transform live cell to dead cell due to underpopulation")
-        @Test
-        void shouldTransformLiveCellToDeadCell2() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.DEAD);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
+            var result = underTest.applyCellTransition(givenCell, givenCellStats);
 
             // Then
             assertThat(result)
@@ -81,25 +53,10 @@ class GameStrategiesTest {
         void shouldTransformLiveCellToDeadCell3() {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
+            var givenCellStats = new CellStats(4);
 
             // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.DEAD);
-        }
-
-        @DisplayName("When neighbor live cells > 3 and other are dead, should transform live cell to dead cell due to overpopulation")
-        @Test
-        void shouldTransformLiveCellToDeadCell4() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
+            var result = underTest.applyCellTransition(givenCell, givenCellStats);
 
             // Then
             assertThat(result)
@@ -107,59 +64,15 @@ class GameStrategiesTest {
         }
 
         @DisplayName("When neighbor live cells = 2, live cell should live to next generation")
-        @Test
-        void shouldLive() {
+        @ParameterizedTest
+        @ValueSource(longs = {2, 3})
+        void shouldLive(long liveCells) {
             // Given
             var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE);
+            var givenCellStats = new CellStats(liveCells);
 
             // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
-        }
-
-        @DisplayName("When neighbor live cells = 3, live cell should live to next generation")
-        @Test
-        void shouldLive2() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.ALIVE, Cell.ALIVE, Cell.ALIVE);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
-        }
-
-        @DisplayName("When neighbor live cells = 2 and other are dead, live cell should live to next generation")
-        @Test
-        void shouldLive3() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
-        }
-
-        @DisplayName("When neighbor live cells = 3 and other are dead, live cell should live to next generation")
-        @Test
-        void shouldLive4() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenNeighborCells = List.of(Cell.DEAD, Cell.ALIVE, Cell.ALIVE, Cell.ALIVE, Cell.DEAD);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenNeighborCells);
+            var result = underTest.applyCellTransition(givenCell, givenCellStats);
 
             // Then
             assertThat(result)

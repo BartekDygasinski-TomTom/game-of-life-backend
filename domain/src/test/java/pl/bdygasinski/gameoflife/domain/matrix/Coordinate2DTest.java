@@ -86,7 +86,7 @@ class Coordinate2DTest {
         })
         void shouldGiveCorrectCoordinate(int deltaX, int deltaY) {
             // When
-            Coordinate2D result = underTest.offset(deltaX, deltaY);
+            Coordinate2D result = underTest.offset(deltaX, deltaY).orElseThrow();
 
             // Then
             assertThat(result)
@@ -105,7 +105,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.up();
+            Coordinate2D result = underTest.up().orElseThrow();
 
             // Then
             assertThat(result.y())
@@ -121,7 +121,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.down();
+            Coordinate2D result = underTest.down().orElseThrow();
 
             // Then
             assertThat(result.y())
@@ -137,7 +137,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.left();
+            Coordinate2D result = underTest.left().orElseThrow();
 
             // Then
             assertThat(result.x())
@@ -153,7 +153,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.right();
+            Coordinate2D result = underTest.right().orElseThrow();
 
             // Then
             assertThat(result.x())
@@ -169,7 +169,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.upLeft();
+            Coordinate2D result = underTest.upLeft().orElseThrow();
 
             // Then
             assertThat(result.x())
@@ -188,7 +188,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.upRight();
+            Coordinate2D result = underTest.upRight().orElseThrow();
 
             // Then
             assertThat(result.x())
@@ -207,7 +207,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.downLeft();
+            Coordinate2D result = underTest.downLeft().orElseThrow();
 
             // Then
             assertThat(result.x())
@@ -226,7 +226,7 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.downRight();
+            Coordinate2D result = underTest.downRight().orElseThrow();
 
             // Then
             assertThat(result.x())

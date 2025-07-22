@@ -8,15 +8,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.bdygasinski.gameoflife.domain.cell.Cell;
+import pl.bdygasinski.gameoflife.domain.cell.CellDataProvider;
 import pl.bdygasinski.gameoflife.domain.matrix.FixedSizeArrayMatrix2D;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
+import pl.bdygasinski.gameoflife.domain.matrix.MatrixDimensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static pl.bdygasinski.gameoflife.domain.Cell.ALIVE;
-import static pl.bdygasinski.gameoflife.domain.Cell.DEAD;
+import static pl.bdygasinski.gameoflife.domain.cell.Cell.ALIVE;
+import static pl.bdygasinski.gameoflife.domain.cell.Cell.DEAD;
 
 @ExtendWith(MockitoExtension.class)
-class BoardTest {
+class GameStateTest {
 
     @Mock
     private Matrix2D<Cell> matrixMock;
@@ -24,11 +27,11 @@ class BoardTest {
     @Spy
     private GameStrategy gameStrategySpy = GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY;
 
-    private Board underTest;
+    private GameState underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new DefaultBoard(matrixMock, gameStrategySpy);
+        underTest = new DefaultGameState(matrixMock, gameStrategySpy);
     }
 
     @DisplayName("nextStep()")
@@ -42,9 +45,11 @@ class BoardTest {
             var givenData = new Cell[][] {
                     {ALIVE, DEAD}
             };
-            var givenMatrix = new FixedSizeArrayMatrix2D<>(givenData);
+            var givenBoardDimensions = new MatrixDimensions(1, 2);
+            var givenBoardDataProvider = new CellDataProvider(givenData);
+            var givenMatrix = new FixedSizeArrayMatrix2D<>(givenBoardDimensions, givenBoardDataProvider);
             var givenStrategy = gameStrategySpy;
-            var underTest = new DefaultBoard(givenMatrix, givenStrategy);
+            var underTest = new DefaultGameState(givenMatrix, givenStrategy);
 
             // When
             var result = underTest.nextStep();
@@ -53,7 +58,7 @@ class BoardTest {
             assertThat(result)
                     .isNotNull()
                     .isNotSameAs(underTest)
-                    .extracting(Board::cellMatrix2D)
+                    .extracting(GameState::board)
                     .isNotEqualTo(givenMatrix);
         }
     }
