@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.bdygasinski.gameoflife.domain.GameStrategies;
 import pl.bdygasinski.gameoflife.rest.adapter.GameStateService;
 import pl.bdygasinski.gameoflife.rest.dto.GameStateDto;
+import pl.bdygasinski.gameoflife.rest.dto.NewRandomGameStateDto;
 
 @RestController
 @RequestMapping(ApiVersion.V1 + "/gamestates")
@@ -22,5 +23,11 @@ class GameStateController {
     @ResponseStatus(HttpStatus.OK)
     GameStateDto nextStep(@Valid @RequestBody GameStateDto requestBodyContent) {
         return gameStateService.nextStep(requestBodyContent, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY);
+    }
+
+    @PostMapping("/random")
+    @ResponseStatus(HttpStatus.OK)
+    GameStateDto random(@Valid @RequestBody NewRandomGameStateDto requestBodyContent) {
+        return gameStateService.random(requestBodyContent, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY);
     }
 }
