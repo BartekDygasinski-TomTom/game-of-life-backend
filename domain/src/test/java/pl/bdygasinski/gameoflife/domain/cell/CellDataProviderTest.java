@@ -51,7 +51,7 @@ class CellDataProviderTest {
         var underTest = new CellDataProvider(givenCells);
 
         // When
-        var result = underTest.clone();
+        var result = underTest.clone(givenCells);
 
         // Then
         assertThat(result)

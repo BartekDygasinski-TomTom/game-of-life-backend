@@ -4,5 +4,5 @@ public interface MatrixDataProvider<T> {
 
     T provide();
 
-    T clone();
+    T clone(T data);
 }

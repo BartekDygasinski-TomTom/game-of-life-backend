@@ -34,7 +34,7 @@ public class TestUtils {
         }
 
         @Override
-        public Coordinate2D[][] clone() {
+        public Coordinate2D[][] clone(Coordinate2D[][] data) {
             Coordinate2D[][] newData = new Coordinate2D[data.length][];
             for (int rowIndex = 0; rowIndex < data.length; rowIndex++) {
                 newData[rowIndex] = Arrays.copyOf(data[rowIndex], data[rowIndex].length);
@@ -58,7 +58,7 @@ public class TestUtils {
         }
 
         @Override
-        public Integer[][] clone() {
+        public Integer[][] clone(Integer[][] data) {
             Integer[][] newData = new Integer[data.length][];
             for (int rowIndex = 0; rowIndex < data.length; rowIndex++) {
                 newData[rowIndex] = Arrays.copyOf(data[rowIndex], data[rowIndex].length);

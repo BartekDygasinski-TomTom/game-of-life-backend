@@ -21,7 +21,7 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
     public FixedSizeArrayMatrix2D(@NonNull MatrixDimensions matrixDimensions, @NonNull MatrixDataProvider<T[][]> matrixDataProvider) {
         this.matrixDataProvider = matrixDataProvider;
         this.matrixDimensions = matrixDimensions;
-        this.matrix = matrixDataProvider.clone();
+        this.matrix = matrixDataProvider.clone(matrixDataProvider.provide());
 
         validateMatrixAfterCreation();
     }
@@ -64,7 +64,7 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
 
     @Override
     public Matrix2D<T> copy() {
-        T[][] clonedMatrix = matrixDataProvider.clone();
+        T[][] clonedMatrix = matrixDataProvider.clone(matrix);
         return new FixedSizeArrayMatrix2D<>(
                 matrixDimensions,
                 new MatrixDataProvider<>() {
@@ -74,8 +74,8 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
                     }
 
                     @Override
-                    public T[][] clone() {
-                        return matrixDataProvider.clone();
+                    public T[][] clone(T[][] data) {
+                        return matrixDataProvider.clone(data);
                     }
                 }
         );

@@ -19,12 +19,12 @@ public class CellDataProvider implements MatrixDataProvider<Cell[][]> {
     }
 
     @Override
-    public Cell[][] clone() {
-        int rows = cells.length;
+    public Cell[][] clone(Cell[][] data) {
+        int rows = data.length;
         Cell[][] newData = new Cell[rows][];
 
         for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
-            newData[rowIndex] = Arrays.copyOf(cells[rowIndex], cells[rowIndex].length);
+            newData[rowIndex] = Arrays.copyOf(data[rowIndex], data[rowIndex].length);
         }
 
         return newData;
