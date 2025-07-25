@@ -1,11 +1,12 @@
 package pl.bdygasinski.gameoflife.domain;
 
+import lombok.NonNull;
 import pl.bdygasinski.gameoflife.domain.cell.Cell;
-import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
+import pl.bdygasinski.gameoflife.domain.matrix.Matrix2DView;
 
 public interface GameState {
 
-    GameState nextStep();
+    @NonNull GameState nextStep();
 
-    Matrix2D<Cell> board();
+    @NonNull Matrix2DView<Cell> board();
 }

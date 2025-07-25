@@ -8,7 +8,7 @@ public enum GameStrategies implements GameStrategy {
     CLASSIC_GAME_OF_LIFE_STRATEGY {
 
         @Override
-        public Cell applyCellTransition(@NonNull Cell cell, @NonNull CellStats cellStats) {
+        public @NonNull Cell applyCellTransition(@NonNull Cell cell, @NonNull CellStats cellStats) {
             long liveNeighbors = cellStats.liveNeighbors();
             return switch (cell) {
                 case DEAD  -> (liveNeighbors == 3) ? Cell.ALIVE : Cell.DEAD;

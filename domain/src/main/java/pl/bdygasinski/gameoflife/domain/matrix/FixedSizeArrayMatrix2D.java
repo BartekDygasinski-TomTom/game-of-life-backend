@@ -1,50 +1,56 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import lombok.Value;
 import pl.bdygasinski.gameoflife.domain.exception.InvalidBoardSizeException;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 
-@EqualsAndHashCode
-public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
+@Value
+public class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
 
-    private final MatrixDimensions matrixDimensions;
-    private final MatrixDataProvider<T[][]> matrixDataProvider;
-    private final T[][] matrix;
+    MatrixDimensions matrixDimensions;
+    T[][] matrix;
+    Class<T> type;
 
-    public FixedSizeArrayMatrix2D(@NonNull MatrixDimensions matrixDimensions, @NonNull MatrixDataProvider<T[][]> matrixDataProvider) {
-        this.matrixDataProvider = matrixDataProvider;
+    public FixedSizeArrayMatrix2D(@NonNull MatrixDimensions matrixDimensions, @NonNull Iterable<T> items, Class<T> type) {
         this.matrixDimensions = matrixDimensions;
-        this.matrix = matrixDataProvider.clone();
+        this.type = type;
+        this.matrix = createArrayFromIterable(items, matrixDimensions, type);
 
         validateMatrixAfterCreation();
     }
 
-    @Override
-    public T getValueAt(@NonNull Coordinate2D coordinate) {
-        return matrix[coordinate.y()][coordinate.x()];
+    private FixedSizeArrayMatrix2D(FixedSizeArrayMatrix2D<T> original) {
+        this.matrixDimensions = original.matrixDimensions;
+        this.type = original.type;
+        this.matrix = deepCopy(original.matrix);
     }
 
     @Override
-    public T setValueAt(@NonNull T value, @NonNull Coordinate2D coordinate) {
-        matrix[coordinate.y()][coordinate.x()] = value;
+    public @NonNull T getValueAt(@NonNull Coordinate2D coordinate) {
+        return matrix[coordinate.getY()][coordinate.getX()];
+    }
+
+    @Override
+    public @NonNull MatrixDimensions getDimensions() {
+        return matrixDimensions;
+    }
+
+    @Override
+    public @NonNull T setValueAt(@NonNull T value, @NonNull Coordinate2D coordinate) {
+        matrix[coordinate.getY()][coordinate.getX()] = value;
         return value;
     }
 
     @Override
-    public int rowCount() { return matrixDimensions.rows(); }
-
-    @Override
-    public int columnCount() { return matrixDimensions.columns(); }
-
-    @Override
-    public List<T> toFlatList() {
+    public @NonNull List<T> toFlatList() {
         return Arrays
                 .stream(matrix)
                 .flatMap(Arrays::stream)
@@ -52,38 +58,18 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
     }
 
     @Override
-    public List<Coordinate2D> getAvailableCoordinates() {
-        return IntStream
-                .range(0, rowCount())
-                .boxed()
-                .flatMap(row -> IntStream
-                        .range(0, columnCount())
-                        .mapToObj(col -> new Coordinate2D(col, row)))
-                .toList();
+    public @NonNull List<Coordinate2D> getAvailableCoordinates() {
+        return matrixDimensions.generateAllCoordinates();
     }
 
     @Override
-    public Matrix2D<T> copy() {
-        T[][] clonedMatrix = matrixDataProvider.clone();
-        return new FixedSizeArrayMatrix2D<>(
-                matrixDimensions,
-                new MatrixDataProvider<>() {
-                    @Override
-                    public T[][] provide() {
-                        return clonedMatrix;
-                    }
-
-                    @Override
-                    public T[][] clone() {
-                        return matrixDataProvider.clone();
-                    }
-                }
-        );
+    public @NonNull Matrix2D<T> copy() {
+        return new FixedSizeArrayMatrix2D<>(this);
     }
 
     @Override
     public boolean containsCoordinate(@NonNull Coordinate2D coordinate2D) {
-        return coordinate2D.x() < columnCount() && coordinate2D.y() < rowCount();
+        return coordinate2D.getX() < matrixDimensions.columns() && coordinate2D.getY() < matrixDimensions.rows();
     }
 
     @Override
@@ -109,7 +95,7 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
         for (T cell : row) {
             joiner.add(String.valueOf(cell));
         }
-        return joiner.toString() + lineSeparator;
+        return joiner + lineSeparator;
     }
 
     private void validateMatrixAfterCreation() {
@@ -127,5 +113,27 @@ public final class FixedSizeArrayMatrix2D<T> implements Matrix2D<T> {
                 requireNonNull(cell, "Cell can't be null");
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private T[][] deepCopy(T[][] original) {
+        T[][] copy = (T[][]) Array.newInstance(type, matrixDimensions.rows(), matrixDimensions.columns());
+        for (int i = 0; i < matrixDimensions.rows(); i++) {
+            copy[i] = original[i].clone();
+        }
+        return copy;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[][] createArrayFromIterable(Iterable<T> iterable, MatrixDimensions matrixDimensions, Class<T> type) {
+        T[][] copy = (T[][]) Array.newInstance(type, matrixDimensions.rows(), matrixDimensions.columns());
+        Iterator<T> iterator = iterable.iterator();
+
+        for (int rowIndex = 0; rowIndex < matrixDimensions.rows(); rowIndex++) {
+            for (int colIndex = 0; colIndex < matrixDimensions.columns(); colIndex++) {
+                copy[rowIndex][colIndex] = iterator.hasNext() ? iterator.next() : null;
+            }
+        }
+        return copy;
     }
 }

@@ -1,30 +1,32 @@
 package pl.bdygasinski.gameoflife.domain.matrix;
 
-import pl.bdygasinski.gameoflife.domain.exception.InvalidCoordinateException;
+import lombok.Value;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public record Coordinate2D(int x, int y) {
+@Value
+public class Coordinate2D {
 
-    public Coordinate2D {
-        if (x < 0) {
-            throw new InvalidCoordinateException("X must be >= 0 but was %s".formatted(x));
+    int x;
+    int y;
+
+    private Coordinate2D(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public static Optional<Coordinate2D> from(int x, int y) {
+        if (x < 0 || y < 0) {
+            return Optional.empty();
         }
 
-        if (y < 0) {
-            throw new InvalidCoordinateException("Y must be >= 0 but was %s".formatted(y));
-        }
+        return Optional.of(new Coordinate2D(x, y));
     }
 
     public Optional<Coordinate2D> offset(int deltaX, int deltaY) {
-        try {
-            return Optional.of(new Coordinate2D(x + deltaX, y + deltaY));
-
-        } catch (InvalidCoordinateException e) {
-            return Optional.empty();
-        }
+        return Coordinate2D.from(x + deltaX, y + deltaY);
     }
 
     public Optional<Coordinate2D> up() {
@@ -60,16 +62,8 @@ public record Coordinate2D(int x, int y) {
     }
 
     public List<Coordinate2D> allNeighborCoordinates() {
-        List<Supplier<Optional<Coordinate2D>>> directionSuppliers = List.of(
-                this::up, this::down, this::left, this::right,
-                this::upLeft, this::upRight, this::downLeft, this::downRight
-        );
-
-        return directionSuppliers
-                .stream()
-                .map(Supplier::get)
+        return Stream.of(up(), down(), left(), right(), upLeft(), upRight(), downLeft(), downRight())
                 .flatMap(Optional::stream)
                 .toList();
-
     }
 }

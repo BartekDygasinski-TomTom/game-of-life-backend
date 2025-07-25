@@ -7,50 +7,44 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchException;
 
 class Coordinate2DTest {
 
-    private final Coordinate2D underTest = new Coordinate2D(1, 1);
+    private final Coordinate2D underTest = Coordinate2D.from(1, 1).orElseThrow();
+    private final int CORRECT_X = 2;
+    private final int CORRECT_Y = 2;
 
 
     @DisplayName("Creation tests")
     @Nested
     class CreationTest {
 
-        @DisplayName("Should throw if x is negative")
+        @DisplayName("Should return empty optional if x is negative")
         @ParameterizedTest
         @ValueSource(ints = {Integer.MIN_VALUE, -1})
-        void shouldThrowIfXIsNegative(int x) {
-            // Given
-            var givenCorrectY = 2;
-
+        void shouldReturnEmptyOptionalIfXIsNegative(int x) {
             // When
-            Exception result = catchException(() -> new Coordinate2D(x, givenCorrectY));
+            var result = Coordinate2D.from(x, CORRECT_Y);
 
             // Then
             assertThat(result)
-                    .isNotNull()
-                    .hasMessageContaining(String.valueOf(x));
+                    .isEmpty();
         }
 
-        @DisplayName("Should throw if y is negative")
+        @DisplayName("Should return empty optional y is negative")
         @ParameterizedTest
         @ValueSource(ints = {Integer.MIN_VALUE, -1})
-        void shouldThrowIfYIsNegative(int y) {
-            // Given
-            var givenCorrectX = 2;
-
+        void shouldReturnEmptyOptionalIfYIsNegative(int y) {
             // When
-            Exception result = catchException(() -> new Coordinate2D(givenCorrectX, y));
+            var result = Coordinate2D.from(CORRECT_X, y);
 
             // Then
             assertThat(result)
-                    .isNotNull()
-                    .hasMessageContaining(String.valueOf(y));
+                    .isEmpty();
         }
 
         @DisplayName("Should create object if y and x are >= 0")
@@ -61,11 +55,11 @@ class Coordinate2DTest {
             var y = x;
 
             // When
-            Exception result = catchException(() -> new Coordinate2D(x, y));
+            var result = Coordinate2D.from(x, y);
 
             // Then
             assertThat(result)
-                    .isNull();
+                    .isPresent();
         }
     }
 
@@ -86,13 +80,14 @@ class Coordinate2DTest {
         })
         void shouldGiveCorrectCoordinate(int deltaX, int deltaY) {
             // When
-            Coordinate2D result = underTest.offset(deltaX, deltaY).orElseThrow();
+            var result = underTest.offset(deltaX, deltaY);
 
             // Then
             assertThat(result)
-                    .isEqualTo(new Coordinate2D(
-                            underTest.x() + deltaX,
-                            underTest.y() + deltaY
+                    .isNotEmpty()
+                    .isEqualTo(Coordinate2D.from(
+                            underTest.getX() + deltaX,
+                            underTest.getY() + deltaY
                     ));
         }
     }
@@ -105,11 +100,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.up().orElseThrow();
+            var result = underTest.up();
 
             // Then
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() - 1);
+            var expected = Coordinate2D.from(underTest.getX(), underTest.getY() - 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -121,11 +118,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.down().orElseThrow();
+            var result = underTest.down();
 
             // Then
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() + 1);
+            var expected = Coordinate2D.from(underTest.getX(), underTest.getY() + 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -137,11 +136,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.left().orElseThrow();
+            var result = underTest.left();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() - 1);
+            var expected = Coordinate2D.from(underTest.getX() - 1, underTest.getY());
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -153,11 +154,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.right().orElseThrow();
+            var result = underTest.right();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() + 1);
+            var expected = Coordinate2D.from(underTest.getX() + 1, underTest.getY());
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -169,14 +172,14 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.upLeft().orElseThrow();
+            var result = underTest.upLeft();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() - 1);
+            var expected = Coordinate2D.from(underTest.getX() - 1, underTest.getY() - 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
 
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() - 1);
         }
     }
 
@@ -188,14 +191,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.upRight().orElseThrow();
+            var result = underTest.upRight();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() + 1);
-
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() - 1);
+            var expected = Coordinate2D.from(underTest.getX() + 1, underTest.getY() - 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -207,14 +209,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.downLeft().orElseThrow();
+            var result = underTest.downLeft();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() - 1);
-
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() + 1);
+            var expected = Coordinate2D.from(underTest.getX() - 1, underTest.getY() + 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -226,14 +227,13 @@ class Coordinate2DTest {
         @Test
         void shouldMove() {
             // When
-            Coordinate2D result = underTest.downRight().orElseThrow();
+            var result = underTest.downRight();
 
             // Then
-            assertThat(result.x())
-                    .isEqualTo(underTest.x() + 1);
-
-            assertThat(result.y())
-                    .isEqualTo(underTest.y() + 1);
+            var expected = Coordinate2D.from(underTest.getX() + 1, underTest.getY() + 1);
+            assertThat(result)
+                    .isNotEmpty()
+                    .isEqualTo(expected);
         }
     }
 
@@ -244,82 +244,45 @@ class Coordinate2DTest {
         @DisplayName("Should return all neighbor coordinates if they are valid")
         @Test
         void shouldReturnAllNeighborCoordinates() {
-            // Given
-            var underTest = new Coordinate2D(1, 1);
-
             // When
-            List<Coordinate2D> result = underTest.allNeighborCoordinates();
+            var result = underTest.allNeighborCoordinates();
 
             // Then
+            var expected = Stream.of(
+                            Coordinate2D.from(1, 0),
+                            Coordinate2D.from(1, 2),
+                            Coordinate2D.from(0, 1),
+                            Coordinate2D.from(2, 1),
+                            Coordinate2D.from(0, 0),
+                            Coordinate2D.from(2, 0),
+                            Coordinate2D.from(0, 2),
+                            Coordinate2D.from(2, 2))
+                    .flatMap(Optional::stream)
+                    .toArray(Coordinate2D[]::new);
+
             assertThat(result)
-                    .containsExactly(
-                            new Coordinate2D(1, 0),
-                            new Coordinate2D(1, 2),
-                            new Coordinate2D(0, 1),
-                            new Coordinate2D(2, 1),
-                            new Coordinate2D(0, 0),
-                            new Coordinate2D(2, 0),
-                            new Coordinate2D(0, 2),
-                            new Coordinate2D(2, 2)
-                    );
+                    .containsExactly(expected);
         }
 
         @DisplayName("Should not return not valid neighbor coordinates")
         @Test
         void shouldNotReturnNotValidNeighborCoordinates() {
             // Given
-            var underTest = new Coordinate2D(0, 0);
+            var underTest = Coordinate2D.from(0, 0).orElseThrow();
 
             // When
-            List<Coordinate2D> result = underTest.allNeighborCoordinates();
+            var result = underTest.allNeighborCoordinates();
 
             // Then
+            var expected = Stream.of(
+                            Coordinate2D.from(0, 1),
+                            Coordinate2D.from(1, 0),
+                            Coordinate2D.from(1, 1))
+                    .flatMap(Optional::stream)
+                    .toArray(Coordinate2D[]::new);
+
             assertThat(result)
-                    .containsExactly(
-                            new Coordinate2D(0, 1),
-                            new Coordinate2D(1, 0),
-                            new Coordinate2D(1, 1));
-        }
-
-    }
-
-    @DisplayName("x()")
-    @Nested
-    class XTest {
-
-        @DisplayName("Should return same value as an input")
-        @ParameterizedTest
-        @ValueSource(ints = {0, Integer.MAX_VALUE})
-        void shouldPassInput(int x) {
-            // Given
-            var underTest = new Coordinate2D(x, 0);
-
-            // When
-            int result = underTest.x();
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(x);
-        }
-    }
-
-    @DisplayName("y()")
-    @Nested
-    class YTest {
-
-        @DisplayName("Should return same value as an input")
-        @ParameterizedTest
-        @ValueSource(ints = {0, Integer.MAX_VALUE})
-        void shouldPassInput(int y) {
-            // Given
-            var underTest = new Coordinate2D(0, y);
-
-            // When
-            int result = underTest.y();
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(y);
+                    .containsExactly(expected);
         }
     }
 }

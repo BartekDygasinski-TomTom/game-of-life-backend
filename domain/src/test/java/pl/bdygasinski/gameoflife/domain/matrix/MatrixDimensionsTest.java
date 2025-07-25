@@ -28,4 +28,22 @@ class MatrixDimensionsTest {
                 .hasMessageContaining(String.valueOf(rows))
                 .hasMessageContaining(String.valueOf(columns));
     }
+
+    @DisplayName("Should return correct total cells")
+    @ParameterizedTest
+    @CsvSource({
+            "1,1,1",
+            "4,5,20"
+    })
+    void shouldReturnCorrectTotalCells(int rows, int columns, int expected) {
+        // Given
+        var underTest = new MatrixDimensions(rows, columns);
+
+        // When
+        var result = underTest.getTotalCells();
+
+        // Then
+        assertThat(result)
+                .isEqualTo(expected);
+    }
 }

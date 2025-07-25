@@ -6,31 +6,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import pl.bdygasinski.gameoflife.domain.TestUtils.CoordinateMatrixProvider;
-import pl.bdygasinski.gameoflife.domain.TestUtils.IntegerMatrixProvider;
 
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
-import static pl.bdygasinski.gameoflife.domain.TestUtils.matrixFromData;
 
 class FixedSizeArrayMatrix2DTest {
 
-    private final Coordinate2D[][] matrixData = {
-            {new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0)},
-            {new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1)},
-            {new Coordinate2D(0, 2), new Coordinate2D(1, 2), new Coordinate2D(2, 2)},
-    };
-    private final MatrixDimensions givenMatrixDimensions =
-            new MatrixDimensions(matrixData.length, matrixData[0].length);
+    private final Collection<Coordinate2D> matrixData = Stream.of(
+                    Coordinate2D.from(0, 0), Coordinate2D.from(1, 0), Coordinate2D.from(2, 0),
+                    Coordinate2D.from(0, 1), Coordinate2D.from(1, 1), Coordinate2D.from(2, 1),
+                    Coordinate2D.from(0, 2), Coordinate2D.from(1, 2), Coordinate2D.from(2, 2)
+            )
+            .flatMap(Optional::stream)
+            .toList();
 
-    private final MatrixDataProvider<Coordinate2D[][]> givenMatrixDataProvider =
-            new CoordinateMatrixProvider(matrixData);
+    private final MatrixDimensions givenMatrixDimensions = new MatrixDimensions(3, 3);
 
     private final FixedSizeArrayMatrix2D<Coordinate2D> underTest =
-            new FixedSizeArrayMatrix2D<>(givenMatrixDimensions, givenMatrixDataProvider);
+            new FixedSizeArrayMatrix2D<>(givenMatrixDimensions, matrixData, Coordinate2D.class);
 
     @DisplayName("creation tests")
     @Nested
@@ -38,14 +35,12 @@ class FixedSizeArrayMatrix2DTest {
 
         private static Stream<Arguments> provideNullDependencies() {
             return Stream.of(
-                    Arguments.of(null, new CoordinateMatrixProvider(new Coordinate2D[][]{
-                            {new Coordinate2D(0, 0)}
-                    })),
-                    Arguments.of(new MatrixDimensions(1, 1), null)
-            );
+                            Arguments.of(null, List.of(1, 2, 3),
+                            Arguments.of(new MatrixDimensions(1, 1), null)
+                    ));
         }
 
-        private static Stream<Integer[][]> provideDataWithNullValues() {
+        private static Stream<Integer[][]> provideDataWithIncorrectValues() {
             return Stream.of(
                     new Integer[][]{
                             null,
@@ -62,75 +57,57 @@ class FixedSizeArrayMatrix2DTest {
                     new Integer[][] {
                             {1, 2, 3},
                             {1, null, 3}
+                    },
+                    new Integer[][]{
+                            {}
+                    },
+                    new Integer[][]{
+                            {1, 2},
+                            {1}
                     }
             );
         }
 
-        private static Stream<Arguments> provideDataWithIncorrectDimensions() {
-            return Stream.of(
-                    Arguments.of(new MatrixDimensions(1, 1), new Integer[][]{{}}),
-                    Arguments.of(new MatrixDimensions(1, 1), new Integer[][]{
-                            {1, 2}
-                    }),
-                    Arguments.of(new MatrixDimensions(1, 1), new Integer[][]{
-                            {1}, {2}
-                    }),
-                    Arguments.of(new MatrixDimensions(2, 2), new Integer[][]{
-                            {1, 2},
-                            {1}
-                    }),
-                    Arguments.of(new MatrixDimensions(2, 2), new Integer[][]{
-                            {1, 2},
-                            {1, 2, 3}
-                    })
-            );
+        private static Collection<Integer> convertToCollectionWithNulls(Integer[][] matrix) {
+            var arrayList = new ArrayList<Integer>(matrix.length);
+
+            for (Integer[] integers : matrix) {
+                if (integers == null) {
+                    continue;
+                }
+
+                arrayList.addAll(Arrays.asList(integers));
+            }
+
+            return Collections.unmodifiableList(arrayList);
         }
 
         @DisplayName("Should throw if input is null")
         @ParameterizedTest
         @MethodSource("provideNullDependencies")
-        void shouldThrowIfInputIsNull(MatrixDimensions matrixDimensions, MatrixDataProvider<Coordinate2D[][]> dataProvider) {
+        void shouldThrowIfInputIsNull(MatrixDimensions matrixDimensions, Iterable<Integer> items) {
             // When
-            var result = catchException(() -> new FixedSizeArrayMatrix2D<>(matrixDimensions, dataProvider));
+            var result = catchException(() -> new FixedSizeArrayMatrix2D<>(matrixDimensions, items, Integer.class));
 
             // Then
             assertThat(result)
-                    .isNotNull()
-                    .hasMessageContaining("null");
+                    .isNotNull();
         }
 
-        @DisplayName("Should throw if any row or column is null")
+        @DisplayName("Should throw if input data are not valid")
         @ParameterizedTest
-        @MethodSource("provideDataWithNullValues")
+        @MethodSource("provideDataWithIncorrectValues")
         void shouldThrowIfMatrixContainsNull(Integer[][] matrixData) {
             // Given
             var givenDimensions = new MatrixDimensions(2, 3);
-            var givenDataProvider = new IntegerMatrixProvider(matrixData);
+            var givenData = convertToCollectionWithNulls(matrixData);
 
             // When
-            var result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenDimensions, givenDataProvider));
+            var result = catchException(() -> new FixedSizeArrayMatrix2D<>(givenDimensions, givenData, Integer.class));
 
             // Then
             assertThat(result)
-                    .isNotNull()
-                    .hasMessageContaining("null");
-        }
-
-        @DisplayName("Should throw if all dimensions of input data are not same as declared dimensions")
-        @ParameterizedTest
-        @MethodSource("provideDataWithIncorrectDimensions")
-        void shouldThrowIfMatrixContainsDataWithWrongDimensions(MatrixDimensions matrixDimensions, Integer[][] values) {
-            // Given
-            var givenDataProvider = new IntegerMatrixProvider(values);
-
-            // When
-            var result = catchException(() -> new FixedSizeArrayMatrix2D<>(matrixDimensions, givenDataProvider));
-
-            // Then
-            assertThat(result)
-                    .isNotNull()
-                    .hasMessageContaining(String.valueOf(matrixDimensions.rows()))
-                    .hasMessageContaining(String.valueOf(matrixDimensions.columns()));
+                    .isNotNull();
         }
     }
 
@@ -155,16 +132,16 @@ class FixedSizeArrayMatrix2DTest {
         @MethodSource("coordinateProvider")
         void shouldGiveItemAtGivenPosition(int x, int y) {
             // Given
-            var givenCoordinate = new Coordinate2D(x, y);
+            var givenCoordinate = Coordinate2D.from(x, y).orElseThrow();
 
             // When
             var result = underTest.getValueAt(givenCoordinate);
 
             // Then
-            assertThat(result.x())
+            assertThat(result.getX())
                     .isEqualTo(x);
 
-            assertThat(result.y())
+            assertThat(result.getY())
                     .isEqualTo(y);
         }
 
@@ -185,7 +162,7 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldThrowIfInputIsNull() {
             // Given
-            var givenCorrectValue = new Coordinate2D(1, 1);
+            var givenCorrectValue = Coordinate2D.from(1, 1).orElseThrow();
 
             // When
             var result = catchException(() -> underTest.setValueAt(givenCorrectValue, null));
@@ -200,7 +177,7 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldThrowIfInputValueIsNull() {
             // Given
-            var givenCorrectCoordinate = new Coordinate2D(1, 1);
+            var givenCorrectCoordinate = Coordinate2D.from(1, 1).orElseThrow();
 
             // When
             var result = catchException(() -> underTest.setValueAt(null, givenCorrectCoordinate));
@@ -216,8 +193,8 @@ class FixedSizeArrayMatrix2DTest {
         @MethodSource("coordinateProvider")
         void shouldGiveItemAtGivenPosition(int x, int y) {
             // Given
-            var givenCoordinate = new Coordinate2D(x, y);
-            var givenValue = new Coordinate2D(10, 10);
+            var givenCoordinate = Coordinate2D.from(x, y).orElseThrow();
+            var givenValue = Coordinate2D.from(10, 10).orElseThrow();
             var preSetItem = underTest.getValueAt(givenCoordinate);
 
             // When
@@ -241,37 +218,23 @@ class FixedSizeArrayMatrix2DTest {
         }
     }
 
-    @DisplayName("rowCount()")
+    @DisplayName("getDimensions()")
     @Nested
-    class RowCountTest {
+    class GetDimensionsTest {
 
-        @DisplayName("Should return size of first dimension array")
+        @DisplayName("Should return input dimensions")
         @Test
-        void shouldReturnSizeOfFirstDimensionArray() {
+        void shouldReturnViewOfSameMatrix() {
             // When
-            var result = underTest.rowCount();
+            var result = underTest.getDimensions();
 
             // Then
             assertThat(result)
-                    .isEqualTo(matrixData.length);
+                    .isEqualTo(givenMatrixDimensions);
         }
     }
 
-    @DisplayName("columnCount()")
-    @Nested
-    class ColumnCountTest {
 
-        @DisplayName("Should return size of second dimension array")
-        @Test
-        void shouldReturnSizeOfSecondDimensionArray() {
-            // When
-            var result = underTest.columnCount();
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(matrixData[0].length);
-        }
-    }
 
     @DisplayName("toFlatList()")
     @Nested
@@ -285,9 +248,7 @@ class FixedSizeArrayMatrix2DTest {
 
             // Then
             assertThat(result).containsExactly(
-                    new Coordinate2D(0, 0), new Coordinate2D(1, 0), new Coordinate2D(2, 0),
-                    new Coordinate2D(0, 1), new Coordinate2D(1, 1), new Coordinate2D(2, 1),
-                    new Coordinate2D(0, 2), new Coordinate2D(1, 2), new Coordinate2D(2, 2)
+                    matrixData.toArray(Coordinate2D[]::new)
             );
         }
 
@@ -301,26 +262,18 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldGiveListOfCoordinatesOfAllItemsInMatrix() {
             // Given
-            var givenData = new Integer[][]{
-                    {1, 2, 3},
-                    {4, 5, 6}
-            };
-            var underTest = matrixFromData(givenData);
+            var givenData = List.of(1, 2, 3, 4, 5, 6);
+            var givenDimensions = new MatrixDimensions(2, 3);
+            var underTest = new FixedSizeArrayMatrix2D<>(givenDimensions, givenData, Integer.class);
 
             // When
             var result = underTest.getAvailableCoordinates();
 
             // Then
+            var expected = givenDimensions.generateAllCoordinates().toArray(Coordinate2D[]::new);
             assertThat(result)
                     .hasSize(6)
-                    .containsExactly(
-                            new Coordinate2D(0, 0),
-                            new Coordinate2D(1, 0),
-                            new Coordinate2D(2, 0),
-                            new Coordinate2D(0, 1),
-                            new Coordinate2D(1, 1),
-                            new Coordinate2D(2, 1)
-                    );
+                    .containsExactly(expected);
         }
 
     }
@@ -333,19 +286,16 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldDeepCopyValues() {
             // Given
-            var givenMatrix = new Integer[][]{
-                    {1, 2, 3},
-                    {4, 5, 6}
-            };
-
-            var underTest = matrixFromData(givenMatrix);
+            var givenData = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6));
+            var givenDimensions = new MatrixDimensions(2, 3);
+            var underTest = new FixedSizeArrayMatrix2D<>(givenDimensions, givenData, Integer.class);
 
             // When
            var result = underTest.copy();
 
             // Then
-            givenMatrix[1][1] = 0;
-            assertThat(result.getValueAt(new Coordinate2D(1, 1)))
+            givenData.set(4, 0);
+            assertThat(result.getValueAt(Coordinate2D.from(1, 1).orElseThrow()))
                     .isEqualTo(5);
         }
     }
@@ -354,18 +304,18 @@ class FixedSizeArrayMatrix2DTest {
     @Nested
     class ContainsCoordinateTest {
 
-        private final int givenRowCount = matrixData.length;
-        private final int givenColCount = matrixData[0].length;
+        private final int givenRowCount = givenMatrixDimensions.columns();
+        private final int givenColCount = givenMatrixDimensions.rows();
 
         @DisplayName("Should return true if x < columns and y < rows")
         @Test
         void shouldReturnTrue() {
             // Given
-            var givenCoordinate = new Coordinate2D(givenColCount - 1, givenRowCount -1);
+            var givenCoordinate = Coordinate2D.from(givenColCount - 1, givenRowCount -1);
 
 
             // When
-            var result = underTest.containsCoordinate(givenCoordinate);
+            var result = underTest.containsCoordinate(givenCoordinate.orElseThrow());
 
             // Then
             assertThat(result)
@@ -376,7 +326,7 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldReturnFalse() {
             // Given
-            var givenCoordinate = new Coordinate2D(givenColCount, givenRowCount - 1);
+            var givenCoordinate = Coordinate2D.from(givenColCount, givenRowCount - 1).orElseThrow();
 
             // When
             var result = underTest.containsCoordinate(givenCoordinate);
@@ -390,7 +340,7 @@ class FixedSizeArrayMatrix2DTest {
         @Test
         void shouldReturnFalse2() {
             // Given
-            var givenCoordinate = new Coordinate2D(givenColCount - 1, givenRowCount);
+            var givenCoordinate = Coordinate2D.from(givenColCount - 1, givenRowCount).orElseThrow();
 
             // When
             var result = underTest.containsCoordinate(givenCoordinate);

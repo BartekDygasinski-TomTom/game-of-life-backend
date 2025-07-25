@@ -11,8 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.bdygasinski.gameoflife.domain.cell.Cell;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchException;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultGameStateTest {
@@ -33,11 +32,7 @@ class DefaultGameStateTest {
         @DisplayName("Should throw if input cell matrix is null")
         @Test
         void shouldThrowIfInputCellMatrixIsNull() {
-            // When
-            Exception result = catchException(() -> new DefaultGameState(null, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
-
-            // Then
-            assertThat(result)
+            assertThatThrownBy(() -> new DefaultGameState(null, spyGameStrategy))
                     .isNotNull()
                     .hasMessageContaining("null");
         }
@@ -45,13 +40,18 @@ class DefaultGameStateTest {
         @DisplayName("Should throw if input strategy is null")
         @Test
         void shouldThrowIfInputStrategyIsNull() {
-            // When
-            Exception result = catchException(() -> new DefaultGameState(mockMatrix, null));
-
-            // Then
-            assertThat(result)
+            assertThatThrownBy(() -> new DefaultGameState(mockMatrix, null))
                     .isNotNull()
                     .hasMessageContaining("null");
+        }
+
+        @DisplayName("Should create object if dependencies are correct")
+        @Test
+        void shouldCreateObjectIfDependenciesAreCorrect() {
+            Exception result = catchException(() -> new DefaultGameState(mockMatrix, spyGameStrategy));
+            assertThat(result)
+                    .isNull();
+
         }
     }
 }

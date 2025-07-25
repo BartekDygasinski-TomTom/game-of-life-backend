@@ -10,12 +10,12 @@ import pl.bdygasinski.gameoflife.domain.cell.Cell;
 import pl.bdygasinski.gameoflife.domain.matrix.Matrix2D;
 import pl.bdygasinski.gameoflife.domain.matrix.MatrixDimensions;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchException;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class GameStateFactoryTest {
 
+    public static final GameStrategy DEFAULT_STRATEGY = GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY;
     private final GameStateFactory underTest = new GameStateFactory();
 
     @DisplayName("fromBaseState()")
@@ -25,11 +25,7 @@ class GameStateFactoryTest {
         @DisplayName("Should throw if input cell matrix is null")
         @Test
         void shouldThrowIfInputCellMatrixIsNull() {
-            // When
-            var result = catchException(() -> underTest.fromBaseState(null, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
-
-            // Then
-            assertThat(result)
+            assertThatThrownBy(() -> underTest.fromBaseState(null, DEFAULT_STRATEGY))
                     .isNotNull()
                     .hasMessageContaining("null");
         }
@@ -37,12 +33,7 @@ class GameStateFactoryTest {
         @DisplayName("Should throw if input strategy is null")
         @Test
         void shouldThrowIfInputStrategyIsNull() {
-            // When
-            var givenMatrix = mock(Matrix2D.class);
-            var result = catchException(() -> underTest.fromBaseState(givenMatrix, null));
-
-            // Then
-            assertThat(result)
+            assertThatThrownBy(() -> underTest.fromBaseState(mock(Matrix2D.class), null))
                     .isNotNull()
                     .hasMessageContaining("null");
         }
@@ -57,9 +48,8 @@ class GameStateFactoryTest {
         @ValueSource(doubles = {-1, -0.000001 -0.0, 1.000001})
         void shouldThrowIfAlivePercentageIsNotValid(double alivePercentage) {
             // When
-            var givenStrategy = GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY;
             var givenDimensions = new MatrixDimensions(4, 4);
-            var result = catchException(() -> underTest.randomGameStateWithAlivePercentage(givenDimensions, alivePercentage, givenStrategy));
+            var result = catchException(() -> underTest.randomGameStateWithAlivePercentage(givenDimensions, alivePercentage, DEFAULT_STRATEGY));
 
             // Then
             assertThat(result)
@@ -83,10 +73,8 @@ class GameStateFactoryTest {
 
             // Then
             var resultMatrix = result.board();
-            assertThat(resultMatrix.rowCount())
-                    .isEqualTo(rows);
-            assertThat(resultMatrix.columnCount())
-                    .isEqualTo(cols);
+            assertThat(resultMatrix.getDimensions())
+                    .isEqualTo(givenDimensions);
 
             var actualAliveCount = resultMatrix
                     .toFlatList()
@@ -103,11 +91,7 @@ class GameStateFactoryTest {
         @DisplayName("Should have throw if dimension is null")
         @Test
         void shouldThrowIfDimensionIsNull() {
-            // When
-            Exception result = catchException(() -> underTest.randomGameStateWithAlivePercentage(null, 0.3, GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY));
-
-            // Then
-            assertThat(result)
+            assertThatThrownBy(() -> underTest.randomGameStateWithAlivePercentage(null, 0.3, DEFAULT_STRATEGY))
                     .isNotNull()
                     .hasMessageContaining("null");
         }

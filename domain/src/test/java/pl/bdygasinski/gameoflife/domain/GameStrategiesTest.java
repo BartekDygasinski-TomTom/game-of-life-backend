@@ -2,11 +2,14 @@ package pl.bdygasinski.gameoflife.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import pl.bdygasinski.gameoflife.domain.cell.Cell;
 import pl.bdygasinski.gameoflife.domain.cell.CellStats;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,57 +21,14 @@ class GameStrategiesTest {
 
         private final GameStrategy underTest = GameStrategies.CLASSIC_GAME_OF_LIFE_STRATEGY;
 
-        @DisplayName("When neighbor live cells = 3, should transform dead cell to live cell")
-        @Test
-        void shouldTransformDeadCellToLiveCell() {
-            // Given
-            var givenCell = Cell.DEAD;
-            var givenCellStats = new CellStats(3);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenCellStats);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
-        }
-
-        @DisplayName("When neighbor live cells < 2, should transform live cell to dead cell due to underpopulation")
-        @Test
-        void shouldTransformLiveCellToDeadCell() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenCellStats = new CellStats(1);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenCellStats);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.DEAD);
-        }
-
-        @DisplayName("When neighbor live cells > 3, should transform live cell to dead cell due to overpopulation")
-        @Test
-        void shouldTransformLiveCellToDeadCell3() {
-            // Given
-            var givenCell = Cell.ALIVE;
-            var givenCellStats = new CellStats(4);
-
-            // When
-            var result = underTest.applyCellTransition(givenCell, givenCellStats);
-
-            // Then
-            assertThat(result)
-                    .isEqualTo(Cell.DEAD);
-        }
-
-        @DisplayName("When neighbor live cells = 2, live cell should live to next generation")
+        @DisplayName("Should correctly transform live cell")
         @ParameterizedTest
-        @ValueSource(longs = {2, 3})
-        void shouldLive(long liveCells) {
+        @MethodSource({
+                "liveCellsWithExpectedResults",
+                "deadCellsWithExpectedResults"
+        })
+        void shouldCorrectlyTransformLiveCell(int liveCells, Cell givenCell, Cell expectedCell) {
             // Given
-            var givenCell = Cell.ALIVE;
             var givenCellStats = new CellStats(liveCells);
 
             // When
@@ -76,7 +36,21 @@ class GameStrategiesTest {
 
             // Then
             assertThat(result)
-                    .isEqualTo(Cell.ALIVE);
+                    .isEqualTo(expectedCell);
+        }
+
+
+
+        private static Stream<Arguments> liveCellsWithExpectedResults() {
+            return IntStream
+                    .rangeClosed(0, 8)
+                    .mapToObj(i -> Arguments.of(i, Cell.ALIVE, (i < 2 || i > 3) ? Cell.DEAD : Cell.ALIVE));
+        }
+
+        private static Stream<Arguments> deadCellsWithExpectedResults() {
+            return IntStream
+                    .rangeClosed(0, 8)
+                    .mapToObj(i -> Arguments.of(i, Cell.DEAD, (i == 3) ? Cell.ALIVE : Cell.DEAD));
         }
     }
 }
