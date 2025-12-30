@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: Game of life
+
+  server:
+    port: 8080
